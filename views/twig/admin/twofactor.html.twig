@@ -1,0 +1,130 @@
+{% include "headitem.html.twig" with {title: "GENERAL_ADMIN_TITLE"|translate} %}
+
+{% if error %}
+    <div class="errorbox" role="alert">
+        <p>
+            {% if error == 'locked' %}{{ translate({ ident: "OXID2FA_ERROR_LOCKED" }) }}
+            {% else %}{{ translate({ ident: "OXID2FA_ERROR_INVALID" }) }}{% endif %}
+        </p>
+    </div>
+{% endif %}
+
+{% if recoveryCodes %}
+    <div class="messagebox">
+        <p class="message"><b>{{ translate({ ident: "OXID2FA_RECOVERY_CODES" }) }}</b></p>
+        <p class="message">{{ translate({ ident: "OXID2FA_RECOVERY_CODES_TEXT" }) }}</p>
+        <p class="message" translate="no">{% for code in recoveryCodes %}<code>{{ code }}</code>{% if not loop.last %}&nbsp;&nbsp; {% endif %}{% endfor %}</p>
+    </div>
+{% endif %}
+
+{% if not operational %}
+    <div class="errorbox"><p>{{ translate({ ident: "OXID2FA_NO_KEY" }) }}</p></div>
+{% elseif not enrollmentAllowed %}
+    <div class="messagebox"><p class="message">{{ translate({ ident: "OXID2FA_NOT_AVAILABLE" }) }}</p></div>
+{% else %}
+    <form name="myedit" id="myedit" action="{{ oViewConf.getSelfLink()|raw }}" method="post" autocomplete="off">
+        {{ oViewConf.getHiddenSid()|raw }}
+        <input type="hidden" name="cl" value="oxid2fa_admin_twofactor">
+        <input type="hidden" name="fnc" value="">
+
+        <table cellspacing="0" cellpadding="0" border="0" width="98%">
+        <tr>
+            <td valign="top" class="edittext">
+                <table cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                    <td class="edittext" width="140">{{ translate({ ident: "OXID2FA_STATUS" }) }}</td>
+                    <td class="edittext">
+                        {% if status == 'active' %}
+                            <b>{{ translate({ ident: "OXID2FA_STATUS_ACTIVE" }) }}</b>
+                            ({{ translate({ ident: "OXID2FA_METHOD" }) }}{% if enabledAt %}, {{ translate({ ident: "OXID2FA_ENABLED_AT" }) }} {{ enabledAt }}{% endif %})
+                        {% elseif status == 'setup' %}
+                            {{ translate({ ident: "OXID2FA_STATUS_SETUP" }) }}
+                        {% else %}
+                            {{ translate({ ident: "OXID2FA_STATUS_INACTIVE" }) }}
+                        {% endif %}
+                        {% include "inputhelp.html.twig" with {'sHelpId': help_id("OXID2FA_HELP_STATUS"), 'sHelpText': help_text("OXID2FA_HELP_STATUS")} %}
+                    </td>
+                </tr>
+
+                {% if status == 'active' and recoveryCodesLeft is defined %}
+                    <tr>
+                        <td class="edittext">{{ translate({ ident: "OXID2FA_RECOVERY_LEFT" }) }}</td>
+                        <td class="edittext">
+                            {% if recoveryCodesLow %}<b>{{ recoveryCodesLeft }}</b> &ndash; {{ translate({ ident: "OXID2FA_RECOVERY_LOW" }) }}
+                            {% else %}{{ recoveryCodesLeft }}{% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
+
+                {% if status == 'inactive' %}
+                    <tr>
+                        <td class="edittext">&nbsp;</td>
+                        <td class="edittext">
+                            <p>{{ translate({ ident: "OXID2FA_INTRO" }) }}</p>
+                            <input type="submit" class="edittext" value="{{ translate({ ident: "OXID2FA_SETUP" }) }}"
+                                   onclick="document.myedit.fnc.value='startSetup'">
+                        </td>
+                    </tr>
+                {% elseif status == 'setup' %}
+                    <tr>
+                        <td class="edittext" valign="top">{{ translate({ ident: "OXID2FA_SETUP_QR" }) }}</td>
+                        <td class="edittext">
+                            <p>{{ translate({ ident: "OXID2FA_SETUP_STEP_SCAN" }) }}</p>
+                            <div style="width: 220px; margin: 8px 0;">{{ qrCodeSvg|raw }}</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="edittext">{{ translate({ ident: "OXID2FA_SETUP_KEY" }) }}</td>
+                        <td class="edittext">
+                            <code translate="no">{{ setupKey }}</code>
+                            {% include "inputhelp.html.twig" with {'sHelpId': help_id("OXID2FA_HELP_SETUP_KEY"), 'sHelpText': help_text("OXID2FA_HELP_SETUP_KEY")} %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="edittext"><label for="oxid2fa-code">{{ translate({ ident: "OXID2FA_CODE" }) }}</label></td>
+                        <td class="edittext">
+                            <input type="text" class="editinput" size="12" maxlength="12" id="oxid2fa-code" name="code"
+                                   inputmode="numeric" autocomplete="one-time-code" spellcheck="false">
+                            {% include "inputhelp.html.twig" with {'sHelpId': help_id("OXID2FA_HELP_SETUP_CODE"), 'sHelpText': help_text("OXID2FA_HELP_SETUP_CODE")} %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="edittext">&nbsp;</td>
+                        <td class="edittext">
+                            <input type="submit" class="edittext" value="{{ translate({ ident: "OXID2FA_CONFIRM" }) }}"
+                                   onclick="document.myedit.fnc.value='confirmSetup'">
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td class="edittext"><label for="oxid2fa-code">{{ translate({ ident: "OXID2FA_CODE" }) }}</label></td>
+                        <td class="edittext">
+                            <input type="text" class="editinput" size="12" maxlength="12" id="oxid2fa-code" name="code"
+                                   autocomplete="one-time-code" autocapitalize="off" spellcheck="false">
+                            {% include "inputhelp.html.twig" with {'sHelpId': help_id("OXID2FA_HELP_CONFIRM_CODE"), 'sHelpText': help_text("OXID2FA_HELP_CONFIRM_CODE")} %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="edittext">&nbsp;</td>
+                        <td class="edittext">
+                            {% if recoveryCodesEnabled %}
+                                <input type="submit" class="edittext" value="{{ translate({ ident: "OXID2FA_REGENERATE" }) }}"
+                                       onclick="document.myedit.fnc.value='regenerateRecoveryCodes'">
+                                {% include "inputhelp.html.twig" with {'sHelpId': help_id("OXID2FA_HELP_REGENERATE"), 'sHelpText': help_text("OXID2FA_HELP_REGENERATE")} %}
+                                <br><br>
+                            {% endif %}
+                            <input type="submit" class="edittext" value="{{ translate({ ident: "OXID2FA_DISABLE" }) }}"
+                                   onclick="document.myedit.fnc.value='disable'">
+                            {% include "inputhelp.html.twig" with {'sHelpId': help_id("OXID2FA_HELP_DISABLE"), 'sHelpText': help_text("OXID2FA_HELP_DISABLE")} %}
+                        </td>
+                    </tr>
+                {% endif %}
+                </table>
+            </td>
+        </tr>
+        </table>
+    </form>
+{% endif %}
+
+{% include "bottomnaviitem.html.twig" %}
+{% include "bottomitem.html.twig" %}

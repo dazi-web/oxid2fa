@@ -1,0 +1,4 @@
+table_storage:
+  table_name: oxmigrations_oxid2fa
+migrations_paths:
+  'DaziWeb\Oxid2Fa\Migrations': data

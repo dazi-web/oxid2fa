@@ -1,0 +1,30 @@
+{% extends 'module_config.html.twig' %}
+
+{% block admin_module_config_form %}
+    {% if oModule.getInfo('id') == 'oxid2fa' %}
+        {% set health = oViewConf.getOxid2faKeyHealth() %}
+        <div class="groupExp" role="status">
+            <p style="margin: 10px 0; font-weight: bold; color: {{ health.isHealthy() ? '#1a7f37' : '#b00020' }};">
+                {{ translate({ ident: "OXID2FA_KEY_TITLE" }) }}:
+                <span aria-hidden="true">{{ health.isHealthy() ? '✔' : '✖' }}</span>
+                {% if not health.hasKey() %}
+                    {% if health.keyFileInvalid %}
+                        {{ translate({ ident: "OXID2FA_KEY_FILE_INVALID" })|format(health.keyFilePath) }}
+                    {% else %}
+                        {{ translate({ ident: "OXID2FA_KEY_MISSING" })|format(health.keyFilePath) }}
+                    {% endif %}
+                {% elseif health.secretsUnreadable > 0 %}
+                    {{ translate({ ident: "OXID2FA_KEY_UNREADABLE" })|format(health.secretsUnreadable, health.secretsTotal) }}
+                {% elseif health.keyFileTooOpen %}
+                    {{ translate({ ident: "OXID2FA_KEY_PERMISSIONS" })|format(health.keyFilePath) }}
+                {% elseif health.source.value == 'environment' %}
+                    {{ translate({ ident: "OXID2FA_KEY_OK_ENV" })|format(health.secretsReadable(), health.secretsTotal) }}
+                {% else %}
+                    {{ translate({ ident: "OXID2FA_KEY_OK_FILE" })|format(health.keyFilePath, health.secretsReadable(), health.secretsTotal) }}
+                {% endif %}
+            </p>
+        </div>
+    {% endif %}
+
+    {{ parent() }}
+{% endblock %}

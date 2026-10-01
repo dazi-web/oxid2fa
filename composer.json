@@ -1,0 +1,78 @@
+{
+    "name": "dazi-web/oxid2fa",
+    "description": "Two-factor authentication (TOTP) for OXID eShop administrators",
+    "type": "oxideshop-module",
+    "keywords": [
+        "oxid",
+        "modules",
+        "eShop"
+    ],
+    "license": [
+        "MIT"
+    ],
+    "require": {
+        "php": "^8.2",
+        "ext-sodium": "*",
+        "symfony/filesystem": "^6.3",
+        "spomky-labs/otphp": "^11.3",
+        "bacon/bacon-qr-code": "^3.0",
+        "symfony/clock": "^6.4"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require-dev": {
+        "phpstan/phpstan": "^2.0.2",
+        "squizlabs/php_codesniffer": "^3.10",
+        "phpmd/phpmd": "^2.15",
+        "oxid-esales/oxideshop-ce": "dev-b-7.3.x",
+        "phpunit/phpunit": "~10.5.17",
+        "oxid-esales/developer-tools": "dev-b-7.3.x"
+    },
+    "conflict": {
+        "oxid-esales/oxideshop-ce": "<7.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "DaziWeb\\Oxid2Fa\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "DaziWeb\\Oxid2Fa\\Tests\\": "tests/",
+            "DaziWeb\\Oxid2Fa\\Migrations\\": "migration/data/",
+            "OxidEsales\\EshopCommunity\\Tests\\": "./vendor/oxid-esales/oxideshop-ce/tests"
+        }
+    },
+    "scripts": {
+        "phpcs": "phpcs --standard=tests/phpcs.xml  --report=full",
+        "phpcs-report": "phpcs --standard=tests/phpcs.xml --report=json --report-file=tests/Reports/phpcs.report.json",
+        "phpcbf": "phpcbf --standard=tests/phpcs.xml",
+
+        "phpstan": "phpstan -ctests/PhpStan/phpstan.neon analyse src/",
+        "phpstan-report": "phpstan -ctests/PhpStan/phpstan.neon analyse src/ --error-format=json > tests/Reports/phpstan.report.json",
+
+        "phpmd": "phpmd src ansi tests/PhpMd/standard.xml",
+        "phpmd-report": "phpmd src json tests/PhpMd/standard.xml --reportfile tests/Reports/phpmd.report.json",
+
+        "static": [
+            "@phpcs",
+            "@phpstan",
+            "@phpmd"
+        ],
+
+        "tests-unit": "XDEBUG_MODE=coverage vendor/bin/phpunit --config=tests/ --testsuite=Unit --coverage-clover=tests/Reports/coverage_unit.xml",
+        "tests-database": "vendor/bin/phpunit --config=tests/ --testsuite=Database",
+        "tests-coverage": "XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text --bootstrap=/var/www/source/bootstrap.php --config=tests/ --coverage-html=tests/Reports/CoverageHtml",
+
+        "tests-all": [
+            "@tests-unit",
+            "@tests-database"
+        ]
+    },
+    "config": {
+        "allow-plugins": {
+            "oxid-esales/oxideshop-composer-plugin": true,
+            "oxid-esales/oxideshop-unified-namespace-generator": true
+        }
+    }
+}

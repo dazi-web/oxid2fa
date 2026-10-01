@@ -1,0 +1,126 @@
+services:
+  _defaults:
+    public: false
+    autowire: true
+
+  Psr\Clock\ClockInterface:
+    class: Symfony\Component\Clock\NativeClock
+
+  DaziWeb\Oxid2Fa\Domain\TwoFactorPolicy:
+    class: DaziWeb\Oxid2Fa\Domain\TwoFactorPolicy
+
+  DaziWeb\Oxid2Fa\Infrastructure\EncryptionKeyFile:
+    factory: [ 'DaziWeb\Oxid2Fa\Infrastructure\EncryptionKeyFile', 'forShop' ]
+
+  DaziWeb\Oxid2Fa\Infrastructure\EncryptionKey:
+    factory: [ 'DaziWeb\Oxid2Fa\Infrastructure\EncryptionKey', 'resolve' ]
+    arguments: [ '@DaziWeb\Oxid2Fa\Infrastructure\EncryptionKeyFile' ]
+
+  DaziWeb\Oxid2Fa\Infrastructure\AuditLogFile:
+    class: DaziWeb\Oxid2Fa\Infrastructure\AuditLogFile
+    public: true
+
+  DaziWeb\Oxid2Fa\Infrastructure\SecretCipher:
+    class: DaziWeb\Oxid2Fa\Infrastructure\SecretCipher
+
+  DaziWeb\Oxid2Fa\Integration\Oxid\TwoFactorSettingsFactory:
+    class: DaziWeb\Oxid2Fa\Integration\Oxid\TwoFactorSettingsFactory
+
+  DaziWeb\Oxid2Fa\Application\TwoFactorSettings:
+    factory: [ '@DaziWeb\Oxid2Fa\Integration\Oxid\TwoFactorSettingsFactory', 'create' ]
+    public: true
+
+  DaziWeb\Oxid2Fa\Application\RequestContext:
+    class: DaziWeb\Oxid2Fa\Integration\Oxid\OxidRequestContext
+
+  DaziWeb\Oxid2Fa\Application\LoginSession:
+    class: DaziWeb\Oxid2Fa\Integration\Oxid\OxidLoginSession
+
+  DaziWeb\Oxid2Fa\Application\UserDirectory:
+    class: DaziWeb\Oxid2Fa\Integration\Oxid\OxidUserDirectory
+
+  DaziWeb\Oxid2Fa\Application\EnrollmentRepository:
+    class: DaziWeb\Oxid2Fa\Infrastructure\DbEnrollmentRepository
+
+  DaziWeb\Oxid2Fa\Application\RecoveryCodeRepository:
+    class: DaziWeb\Oxid2Fa\Infrastructure\DbRecoveryCodeRepository
+
+  DaziWeb\Oxid2Fa\Application\RequirementRepository:
+    class: DaziWeb\Oxid2Fa\Infrastructure\DbRequirementRepository
+
+  DaziWeb\Oxid2Fa\Application\AuditTrail:
+    class: DaziWeb\Oxid2Fa\Infrastructure\FileAuditTrail
+
+  DaziWeb\Oxid2Fa\Application\AuditReport:
+    class: DaziWeb\Oxid2Fa\Application\AuditReport
+    public: true
+
+  DaziWeb\Oxid2Fa\Application\AdminOverview:
+    class: DaziWeb\Oxid2Fa\Application\AdminOverview
+    public: true
+
+  DaziWeb\Oxid2Fa\Application\ChallengeThrottle:
+    class: DaziWeb\Oxid2Fa\Infrastructure\DbChallengeThrottle
+
+  DaziWeb\Oxid2Fa\Application\TotpVerifier:
+    class: DaziWeb\Oxid2Fa\Application\TotpVerifier
+
+  DaziWeb\Oxid2Fa\Application\QrCodeRenderer:
+    class: DaziWeb\Oxid2Fa\Application\QrCodeRenderer
+    public: true
+
+  DaziWeb\Oxid2Fa\Application\RecoveryCodeService:
+    class: DaziWeb\Oxid2Fa\Application\RecoveryCodeService
+
+  DaziWeb\Oxid2Fa\Application\AuditLog:
+    class: DaziWeb\Oxid2Fa\Application\AuditLog
+    arguments:
+      $logger: '@DaziWeb\Oxid2Fa\AuditLogger'
+
+  DaziWeb\Oxid2Fa\AuditLogger:
+    class: Monolog\Logger
+    factory: [ '@DaziWeb\Oxid2Fa\AuditLogger\Factory', 'create' ]
+
+  DaziWeb\Oxid2Fa\AuditLogger\Factory:
+    class: OxidEsales\EshopCommunity\Internal\Framework\Logger\Factory\MonologLoggerFactory
+    arguments:
+      $configuration: '@DaziWeb\Oxid2Fa\AuditLogger\Configuration'
+
+  DaziWeb\Oxid2Fa\AuditLogger\Configuration:
+    class: OxidEsales\EshopCommunity\Internal\Framework\Logger\Configuration\MonologConfiguration
+    arguments:
+      $loggerName: 'TwoFactor Audit'
+      $logFilePath: '@=service("DaziWeb\\Oxid2Fa\\Infrastructure\\AuditLogFile").path()'
+      $logLevel: !php/const Psr\Log\LogLevel::NOTICE
+
+  DaziWeb\Oxid2Fa\Application\ChallengeService:
+    class: DaziWeb\Oxid2Fa\Application\ChallengeService
+
+  DaziWeb\Oxid2Fa\Application\EnrollmentService:
+    class: DaziWeb\Oxid2Fa\Application\EnrollmentService
+    public: true
+
+  DaziWeb\Oxid2Fa\Application\AccountCleanup:
+    class: DaziWeb\Oxid2Fa\Application\AccountCleanup
+    public: true
+
+  DaziWeb\Oxid2Fa\Application\KeyHealthChecker:
+    class: DaziWeb\Oxid2Fa\Application\KeyHealthChecker
+    public: true
+
+  DaziWeb\Oxid2Fa\Application\SetupService:
+    class: DaziWeb\Oxid2Fa\Application\SetupService
+    public: true
+
+  DaziWeb\Oxid2Fa\Application\TwoFactorLoginFlow:
+    class: DaziWeb\Oxid2Fa\Application\TwoFactorLoginFlow
+    public: true
+
+  DaziWeb\Oxid2Fa\Application\TwoFactorGate:
+    class: DaziWeb\Oxid2Fa\Application\TwoFactorGate
+    public: true
+
+  DaziWeb\Oxid2Fa\Command\ResetTwoFactorCommand:
+    class: DaziWeb\Oxid2Fa\Command\ResetTwoFactorCommand
+    tags:
+      - { name: 'console.command', command: 'oxid2fa:reset' }

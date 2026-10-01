@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<ruleset name="Standard PHPMD rule set for Oxid"
+         xmlns="http://pmd.sf.net/ruleset/1.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sf.net/ruleset/1.0.0
+                     http://pmd.sf.net/ruleset_xml_schema.xsd"
+         xsi:noNamespaceSchemaLocation="
+                     http://pmd.sf.net/ruleset_xml_schema.xsd">
+    <description>
+        Standard OXID Ruleset
+    </description>
+
+    <rule ref="rulesets/cleancode.xml/StaticAccess">
+        <properties>
+            <property name="exceptions">
+                <!--
+                    Pure value helpers and named constructors (no hidden state), the factory API of the
+                    TOTP library, and the shop's own static Registry that the Integration adapters wrap.
+                -->
+                <value>
+                    \Symfony\Component\Filesystem\Path,
+                    \DaziWeb\Oxid2Fa\Infrastructure\UtcDateTime,
+                    \DaziWeb\Oxid2Fa\Infrastructure\EncryptionKey,
+                    \DaziWeb\Oxid2Fa\Domain\Context,
+                    \DaziWeb\Oxid2Fa\Domain\Mode,
+                    \DaziWeb\Oxid2Fa\Domain\PendingStep,
+                    \OTPHP\TOTP,
+                    \OxidEsales\Eshop\Core\Registry
+                </value>
+            </property>
+        </properties>
+    </rule>
+
+    <rule ref="rulesets/codesize.xml" />
+    <rule ref="rulesets/design.xml" />
+    <rule ref="rulesets/naming.xml" />
+    <rule ref="rulesets/unusedcode.xml" />
+</ruleset>

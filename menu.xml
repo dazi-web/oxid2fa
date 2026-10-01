@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ISO-8859-15"?>
+<OX>
+    <OXMENU id="NAVIGATION_ESHOPADMIN">
+        <MAINMENU id="mxuadmin">
+            <SUBMENU id="mxusers">
+                <TAB id="tbcluser_twofactor" cl="oxid2fa_admin_user_twofactor" />
+            </SUBMENU>
+        </MAINMENU>
+        <MAINMENU id="mxservice">
+            <SUBMENU id="oxid2fa_security" cl="oxid2fa_admin_twofactor" />
+            <SUBMENU id="oxid2fa_overview" cl="oxid2fa_admin_overview" rights="malladmin" />
+        </MAINMENU>
+    </OXMENU>
+</OX>

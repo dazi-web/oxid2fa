@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="{{ oViewConf.getActLanguageAbbr() }}">
+<head>
+    <title>{{ translate({ ident: "OXID2FA_TITLE" }) }}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset={{ charset }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="{{ oViewConf.getResourceUrl()|raw }}login.css">
+    <link rel="stylesheet" href="{{ oViewConf.getResourceUrl()|raw }}colors_{{ oViewConf.getEdition()|lower }}.css">
+    <style>
+        /* The core login box is built for a short form and centres itself vertically; this page can be taller. */
+        div.admin-login-box { position: static; transform: none; margin: 40px auto; max-width: calc(100% - 32px); }
+        .oxid2fa-content { padding: 20px 30px 30px; }
+        .oxid2fa-content h1 { font-size: 1.25em; margin: 0 0 15px; }
+        div.admin-login-box .oxid2fa-content form, div.admin-login-box .oxid2fa-secondary form { padding: 0; }
+        .oxid2fa-content p { margin: 0 0 12px; line-height: 1.4; }
+        .oxid2fa-content .error { color: #b00020; }
+        .oxid2fa-qr { text-align: center; margin: 15px 0; }
+        .oxid2fa-qr svg { max-width: 100%; height: auto; }
+        .oxid2fa-key { display: block; font-family: monospace; word-break: break-all; margin-top: 4px; }
+        .oxid2fa-codes { list-style: none; padding: 0; margin: 0 0 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; font-family: monospace; font-size: 1.05em; }
+        .oxid2fa-content input[type="checkbox"] { width: auto; margin: 0 6px 0 0; }
+        .oxid2fa-content input[type="text"] { font-size: 1.15em; letter-spacing: 0.08em; }
+        .oxid2fa-secondary { padding: 0 30px 15px; text-align: center; }
+        .oxid2fa-secondary button { background: none; border: 0; color: inherit; text-decoration: underline; cursor: pointer; padding: 6px; font: inherit; }
+        .oxid2fa-secondary button:hover { text-decoration: none; }
+    </style>
+</head>
+<body>
+<div class="admin-login-box">
+    <div id="shopLogo"><img src="{{ oViewConf.getImageUrl('logo_dark.svg')|raw }}" alt=""></div>
+
+    <div class="oxid2fa-content">
+        <h1>{{ translate({ ident: "OXID2FA_TITLE" }) }}</h1>
+
+        {% if error %}
+            <p class="error" role="alert">
+                {% if error == 'locked' %}{{ translate({ ident: "OXID2FA_ERROR_LOCKED" }) }}
+                {% elseif error == 'notSaved' %}{{ translate({ ident: "OXID2FA_ERROR_NOT_SAVED" }) }}
+                {% else %}{{ translate({ ident: "OXID2FA_ERROR_INVALID" }) }}{% endif %}
+            </p>
+        {% endif %}
+
+        {% if recoveryCodes or step == 'acknowledge' %}
+            {% if recoveryCodes %}
+                <p>{{ translate({ ident: "OXID2FA_RECOVERY_CODES_TEXT" }) }}</p>
+                <ul class="oxid2fa-codes" translate="no">{% for code in recoveryCodes %}<li>{{ code }}</li>{% endfor %}</ul>
+            {% else %}
+                <p>{{ translate({ ident: "OXID2FA_RECOVERY_CODES_NOT_SHOWN" }) }}</p>
+                <form action="{{ oViewConf.getSelfLink()|raw }}" method="post">
+                    {{ oViewConf.getHiddenSid()|raw }}
+                    <input type="hidden" name="cl" value="oxid2fa_twofactor_challenge">
+                    <input type="hidden" name="fnc" value="reissueRecoveryCodes">
+                    <input type="submit" value="{{ translate({ ident: "OXID2FA_REGENERATE" }) }}">
+                </form>
+            {% endif %}
+            <form action="{{ oViewConf.getSelfLink()|raw }}" method="post">
+                {{ oViewConf.getHiddenSid()|raw }}
+                <input type="hidden" name="cl" value="oxid2fa_twofactor_challenge">
+                <input type="hidden" name="fnc" value="acknowledgeRecoveryCodes">
+                <label><input type="checkbox" name="saved" value="1"> {{ translate({ ident: "OXID2FA_RECOVERY_CODES_SAVED" }) }}</label>
+                <input type="submit" class="btn" value="{{ translate({ ident: "OXID2FA_CONTINUE" }) }}">
+            </form>
+        {% elseif step == 'unavailable' %}
+            <p class="error" role="alert">{{ translate({ ident: "OXID2FA_UNAVAILABLE" }) }}</p>
+        {% elseif step == 'setup' %}
+            <p>{{ translate({ ident: "OXID2FA_SETUP_REQUIRED" }) }}</p>
+            <p>{{ translate({ ident: "OXID2FA_SETUP_STEP_SCAN" }) }}</p>
+            <div class="oxid2fa-qr">{{ qrCodeSvg|raw }}</div>
+            <p>{{ translate({ ident: "OXID2FA_SETUP_KEY" }) }}: <code class="oxid2fa-key" translate="no">{{ setupKey }}</code></p>
+            <form action="{{ oViewConf.getSelfLink()|raw }}" method="post">
+                {{ oViewConf.getHiddenSid()|raw }}
+                <input type="hidden" name="cl" value="oxid2fa_twofactor_challenge">
+                <input type="hidden" name="fnc" value="confirmSetup">
+                <label for="code">{{ translate({ ident: "OXID2FA_CODE" }) }}</label>
+                <input type="text" name="code" id="code" inputmode="numeric" autocomplete="one-time-code" spellcheck="false" autofocus>
+                <input type="submit" class="btn" value="{{ translate({ ident: "OXID2FA_CONFIRM" }) }}">
+            </form>
+        {% else %}
+            <p>{{ translate({ ident: "OXID2FA_CHALLENGE_TEXT" }) }}</p>
+            <form action="{{ oViewConf.getSelfLink()|raw }}" method="post">
+                {{ oViewConf.getHiddenSid()|raw }}
+                <input type="hidden" name="cl" value="oxid2fa_twofactor_challenge">
+                <input type="hidden" name="fnc" value="verify">
+                <label for="code">{{ translate({ ident: "OXID2FA_CODE" }) }}</label>
+                <input type="text" name="code" id="code" autocomplete="one-time-code" autocapitalize="off" spellcheck="false" autofocus>
+                <input type="submit" class="btn" value="{{ translate({ ident: "OXID2FA_VERIFY" }) }}">
+            </form>
+        {% endif %}
+    </div>
+
+    <div class="oxid2fa-secondary">
+        <form action="{{ oViewConf.getSelfLink()|raw }}" method="post">
+            {{ oViewConf.getHiddenSid()|raw }}
+            <input type="hidden" name="cl" value="oxid2fa_twofactor_challenge">
+            <input type="hidden" name="fnc" value="logout">
+            <button type="submit">{{ translate({ ident: "OXID2FA_LOGOUT" }) }}</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

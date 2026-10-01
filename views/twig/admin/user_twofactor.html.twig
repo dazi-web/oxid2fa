@@ -1,0 +1,75 @@
+{% include "headitem.html.twig" with {title: "GENERAL_ADMIN_TITLE"|translate} %}
+
+{% if error == 'selfReset' %}
+    <div class="errorbox" role="alert"><p>{{ translate({ ident: "OXID2FA_ERROR_SELF_RESET" }) }}</p></div>
+{% endif %}
+
+{% if not mayReset %}
+    <div class="messagebox"><p class="message">{{ translate({ ident: "OXID2FA_RESET_NOT_ALLOWED" }) }}</p></div>
+{% elseif oxid %}
+    <table cellspacing="0" cellpadding="0" border="0" width="98%">
+    <tr>
+        <td valign="top" class="edittext">
+            <table cellspacing="0" cellpadding="0" border="0">
+            <tr>
+                <td class="edittext" width="140">{{ translate({ ident: "OXID2FA_STATUS" }) }}</td>
+                <td class="edittext">
+                    <b>{{ translate({ ident: twoFactorActive ? "OXID2FA_STATUS_ACTIVE" : "OXID2FA_STATUS_INACTIVE" }) }}</b>
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("OXID2FA_HELP_STATUS"), 'sHelpText': help_text("OXID2FA_HELP_STATUS")} %}
+                </td>
+            </tr>
+            <tr>
+                <td class="edittext">{{ translate({ ident: "OXID2FA_COL_REQUIRED" }) }}</td>
+                <td class="edittext">
+                    <form action="{{ oViewConf.getSelfLink()|raw }}" method="post" style="display: inline;">
+                        {{ oViewConf.getHiddenSid()|raw }}
+                        <input type="hidden" name="cl" value="oxid2fa_admin_user_twofactor">
+                        <input type="hidden" name="fnc" value="setRequired">
+                        <input type="hidden" name="oxid" value="{{ oxid }}">
+                        <input type="hidden" name="required" value="{{ twoFactorRequired ? '0' : '1' }}">
+                        <b>{{ translate({ ident: twoFactorRequired ? "OXID2FA_REQUIRED_YES" : "OXID2FA_REQUIRED_NO" }) }}</b>
+                        <input type="submit" class="edittext" value="{{ translate({ ident: twoFactorRequired ? "OXID2FA_RELEASE" : "OXID2FA_REQUIRE" }) }}">
+                    </form>
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("OXID2FA_HELP_REQUIRED"), 'sHelpText': help_text("OXID2FA_HELP_REQUIRED")} %}
+                </td>
+            </tr>
+            {% if twoFactorActive and not isSelf %}
+                <tr>
+                    <td class="edittext">{{ translate({ ident: "OXID2FA_RESET" }) }}</td>
+                    <td class="edittext">
+                        <form action="{{ oViewConf.getSelfLink()|raw }}" method="post" style="display: inline;"
+                              onsubmit="return confirm('{{ translate({ ident: "OXID2FA_RESET_CONFIRM" })|e('js') }}');">
+                            {{ oViewConf.getHiddenSid()|raw }}
+                            <input type="hidden" name="cl" value="oxid2fa_admin_user_twofactor">
+                            <input type="hidden" name="fnc" value="reset">
+                            <input type="hidden" name="oxid" value="{{ oxid }}">
+                            <input type="submit" class="edittext" value="{{ translate({ ident: "OXID2FA_RESET" }) }}">
+                        </form>
+                        {% include "inputhelp.html.twig" with {'sHelpId': help_id("OXID2FA_HELP_RESET"), 'sHelpText': help_text("OXID2FA_HELP_RESET")} %}
+                    </td>
+                </tr>
+            {% elseif isSelf %}
+                <tr>
+                    <td class="edittext">&nbsp;</td>
+                    <td class="edittext">{{ translate({ ident: "OXID2FA_ERROR_SELF_RESET" }) }}</td>
+                </tr>
+            {% endif %}
+            </table>
+        </td>
+    </tr>
+    </table>
+
+    <br>
+    <table cellspacing="0" cellpadding="0" border="0" width="98%">
+        <tr>
+            <td class="edittext">
+                <b>{{ translate({ ident: "OXID2FA_LOG_TITLE" }) }}</b>
+                {% include "inputhelp.html.twig" with {'sHelpId': help_id("OXID2FA_HELP_LOG"), 'sHelpText': help_text("OXID2FA_HELP_LOG")} %}
+            </td>
+        </tr>
+    </table>
+    {% include "@oxid2fa/admin/include/twofactor_log.html.twig" with {auditRows: auditRows, showAccount: false} %}
+{% endif %}
+
+{% include "bottomnaviitem.html.twig" %}
+{% include "bottomitem.html.twig" %}

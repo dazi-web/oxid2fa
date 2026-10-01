@@ -1,0 +1,24 @@
+{# Audit log table; expects auditRows, optional showAccount #}
+{% if auditRows %}
+    <table cellspacing="0" cellpadding="0" border="0" width="98%">
+        <tr>
+            <td class="listheader first" height="15">&nbsp;{{ translate({ ident: "OXID2FA_LOG_TIME" }) }}</td>
+            <td class="listheader" height="15">{{ translate({ ident: "OXID2FA_LOG_EVENT" }) }}</td>
+            {% if showAccount %}<td class="listheader" height="15">{{ translate({ ident: "OXID2FA_LOG_ACCOUNT" }) }}</td>{% endif %}
+            <td class="listheader" height="15">{{ translate({ ident: "OXID2FA_LOG_ACTOR" }) }}</td>
+            <td class="listheader" height="15">{{ translate({ ident: "OXID2FA_LOG_ORIGIN" }) }}</td>
+        </tr>
+        {% for row in auditRows %}
+            {% set cls = loop.index is odd ? 'listitem' : 'listitem2' %}
+            <tr>
+                <td class="{{ cls }}" height="20" nowrap>&nbsp;{{ row.time }}</td>
+                <td class="{{ cls }}">{{ translate({ ident: "OXID2FA_EVENT_" ~ row.event }) }}</td>
+                {% if showAccount %}<td class="{{ cls }}">{{ row.account }}</td>{% endif %}
+                <td class="{{ cls }}">{{ row.actor }}</td>
+                <td class="{{ cls }}" translate="no">{{ row.origin }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <div class="messagebox"><p class="message">{{ translate({ ident: "OXID2FA_LOG_EMPTY" }) }}</p></div>
+{% endif %}
