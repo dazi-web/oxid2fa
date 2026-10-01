@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- GraphQL: the query `twoFactorLogin(username, password, code)` for administrators with 2FA (needs the GraphQL base
+  module, which stays optional)
+
 ### Security
 - Administrators who owe a second factor can no longer sign in with their password alone outside the admin area
   (shop front end, GraphQL API, other modules). They are refused and `2FA_LOGIN_REFUSED` is logged. Before, a GraphQL

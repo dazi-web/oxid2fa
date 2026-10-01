@@ -90,4 +90,106 @@ final class PasswordOnlyLoginGuardTest extends TestCase
         $this->expectException(ChallengeRequired::class);
         $blocking->passwordOnlyGuard->assertAllowed(self::ADMIN);
     }
+
+    public function testACorrectCodeSentWithThePasswordLetsAnAdminIn(): void
+    {
+        $f = new TwoFactorFixture();
+        $enrolled = $f->enrollUser(self::ADMIN);
+
+        $f->submission->provide($f->currentCode($enrolled['secret']));
+        $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
+
+        $this->assertNotContains('2FA_LOGIN_REFUSED', array_column($f->auditEntries, 'message'));
+        $this->assertNull($f->submission->take(), 'the code is used up');
+    }
+
+    public function testAWrongCodeIsRefusedAndCountsAsAFailedAttempt(): void
+    {
+        $f = new TwoFactorFixture();
+        $f->enrollUser(self::ADMIN);
+
+        $f->submission->provide('000000');
+        try {
+            $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
+            $this->fail('Expected the sign-in to be refused');
+        } catch (ChallengeRequired) {
+            $this->assertSame(1, $f->throttle->attempts(self::ADMIN));
+            $this->assertSame(
+                ['2FA_ENABLED', '2FA_CHALLENGE_FAILED', '2FA_LOGIN_REFUSED'],
+                array_column($f->auditEntries, 'message')
+            );
+        }
+    }
+
+    public function testTheSameCodeCannotBeUsedTwice(): void
+    {
+        $f = new TwoFactorFixture();
+        $enrolled = $f->enrollUser(self::ADMIN);
+        $code = $f->currentCode($enrolled['secret']);
+        $f->submission->provide($code);
+        $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
+
+        $f->submission->provide($code);
+
+        $this->expectException(ChallengeRequired::class);
+        $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
+    }
+
+    public function testARecoveryCodeWorksOnceInsteadOfTheAuthenticatorCode(): void
+    {
+        $f = new TwoFactorFixture();
+        $enrolled = $f->enrollUser(self::ADMIN);
+        $recoveryCode = $enrolled['recoveryCodes'][0];
+
+        $f->submission->provide($recoveryCode);
+        $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
+
+        $f->submission->provide($recoveryCode);
+        $this->expectException(ChallengeRequired::class);
+        $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
+    }
+
+    public function testGuessingCodesLocksTheAccountEvenForTheCorrectCode(): void
+    {
+        $f = new TwoFactorFixture();
+        $enrolled = $f->enrollUser(self::ADMIN);
+        for ($i = 0; $i < 5; $i++) {
+            $f->submission->provide('000000');
+            try {
+                $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
+            } catch (ChallengeRequired) {
+                // expected
+            }
+        }
+
+        $f->submission->provide($f->currentCode($enrolled['secret']));
+
+        $this->expectException(ChallengeRequired::class);
+        $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
+    }
+
+    public function testACodeDoesNotHelpWhereThereIsNothingToCheckItAgainst(): void
+    {
+        // Given mandatory 2FA and an admin who has not set it up: setup only exists in the admin login
+        $f = new TwoFactorFixture(Mode::Mandatory);
+        $f->submission->provide('123456');
+
+        $this->expectException(ChallengeRequired::class);
+        $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
+    }
+
+    public function testACodeIsNotAcceptedWhileTheKeyIsMissing(): void
+    {
+        // Given an enrolled admin and a key that has gone missing: the operator chose to block such accounts
+        $enrolled = new TwoFactorFixture();
+        $secret = $enrolled->enrollUser(self::ADMIN)['secret'];
+        $f = new TwoFactorFixture(Mode::Optional, operational: false);
+        $f->enrollments->copyFrom($enrolled->enrollments);
+
+        $f->clock->sleep(30); // a later time step than the one spent while enrolling, so the code itself is valid
+        $f->submission->provide($f->currentCode($secret));
+
+        $this->expectException(ChallengeRequired::class);
+        $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
+    }
 }

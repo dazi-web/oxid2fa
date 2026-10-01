@@ -96,6 +96,26 @@ services:
   DaziWeb\Oxid2Fa\Application\SecondFactorDecision:
     class: DaziWeb\Oxid2Fa\Application\SecondFactorDecision
 
+  DaziWeb\Oxid2Fa\Application\SecondFactorSubmission:
+    class: DaziWeb\Oxid2Fa\Application\SecondFactorSubmission
+    public: true
+
+  # Only used if the GraphQL base module is installed: nothing else reads the tag or instantiates the controller.
+  # Neither is autowired, because autowiring would load classes of a module that may not be there.
+  DaziWeb\Oxid2Fa\Integration\GraphQL\NamespaceMapper:
+    class: DaziWeb\Oxid2Fa\Integration\GraphQL\NamespaceMapperFactory
+    factory: [ 'DaziWeb\Oxid2Fa\Integration\GraphQL\NamespaceMapperFactory', 'create' ]
+    autowire: false
+    tags: [ 'graphql_namespace_mapper' ]
+
+  DaziWeb\Oxid2Fa\Integration\GraphQL\Controller\TwoFactorLogin:
+    class: DaziWeb\Oxid2Fa\Integration\GraphQL\Controller\TwoFactorLogin
+    public: true
+    autowire: false
+    arguments:
+      - '@?OxidEsales\GraphQL\Base\Service\LoginServiceInterface'
+      - '@DaziWeb\Oxid2Fa\Application\SecondFactorSubmission'
+
   DaziWeb\Oxid2Fa\Application\PasswordOnlyLoginGuard:
     class: DaziWeb\Oxid2Fa\Application\PasswordOnlyLoginGuard
     public: true

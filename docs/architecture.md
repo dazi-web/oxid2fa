@@ -69,6 +69,16 @@ second factor is refused with the shop's usual "invalid login" message, and `2FA
 covers anyone who is an administrator and has 2FA, is required to have it, or cannot get it because mandatory mode is on.
 Customers are not affected. The consequence: such an account cannot use the API or the front end with its password alone.
 
+For the GraphQL API there is the query `twoFactorLogin(username, password, code)`
+(`Integration/GraphQL/Controller/TwoFactorLogin`). It hands the code to `SecondFactorSubmission` and calls the base
+module's login service; `PasswordOnlyLoginGuard` then checks the code inside `onLogin()` with the same
+`ChallengeService` as the admin login, so attempt limit, replay protection and recovery codes apply. The code is
+consumed there, so it cannot leak into another login of the same request. The query is registered with a service tagged
+`graphql_namespace_mapper`. The shop builds every service of a module when the module is activated, also without the
+GraphQL base module; that is why the mapper is created by `NamespaceMapperFactory` (touches the base module's interface
+only if it exists) and the controller takes its login service as optional. The module is a dev dependency and a
+`suggest`, not a requirement.
+
 ```
 Admin Login → password (core) → TwoFactorGate → TwoFactorPolicy
                                    ├─ not required ───────────────→ logged in
