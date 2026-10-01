@@ -20,6 +20,7 @@ enum AuditEvent: string
     case ChallengeLocked = '2FA_CHALLENGE_LOCKED';
     case NotOperational = '2FA_NOT_OPERATIONAL';
     case Unlocked = '2FA_UNLOCKED';
+    case LoginRefused = '2FA_LOGIN_REFUSED';
     case RequiredSet = '2FA_REQUIRED_SET';
     case RequiredCleared = '2FA_REQUIRED_CLEARED';
 }

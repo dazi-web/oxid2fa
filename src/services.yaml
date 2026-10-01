@@ -93,6 +93,13 @@ services:
       $logFilePath: '@=service("DaziWeb\\Oxid2Fa\\Infrastructure\\AuditLogFile").path()'
       $logLevel: !php/const Psr\Log\LogLevel::NOTICE
 
+  DaziWeb\Oxid2Fa\Application\SecondFactorDecision:
+    class: DaziWeb\Oxid2Fa\Application\SecondFactorDecision
+
+  DaziWeb\Oxid2Fa\Application\PasswordOnlyLoginGuard:
+    class: DaziWeb\Oxid2Fa\Application\PasswordOnlyLoginGuard
+    public: true
+
   DaziWeb\Oxid2Fa\Application\ChallengeService:
     class: DaziWeb\Oxid2Fa\Application\ChallengeService
 

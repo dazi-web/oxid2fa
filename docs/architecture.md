@@ -38,7 +38,7 @@ vendor/bin/oe-console oxid2fa:reset <login name>
 ```
 
 Audit entries (`2FA_ENABLED`, `2FA_DISABLED`, `2FA_RESET`, `RECOVERY_CODES_REGENERATED`, `RECOVERY_CODE_USED`,
-`2FA_CHALLENGE_FAILED`, `2FA_CHALLENGE_LOCKED`, `2FA_UNLOCKED`, `2FA_NOT_OPERATIONAL`, `2FA_REQUIRED_SET`, `2FA_REQUIRED_CLEARED`) go to `oxid2fa_audit.log` in the shop's log directory.
+`2FA_CHALLENGE_FAILED`, `2FA_CHALLENGE_LOCKED`, `2FA_UNLOCKED`, `2FA_LOGIN_REFUSED`, `2FA_NOT_OPERATIONAL`, `2FA_REQUIRED_SET`, `2FA_REQUIRED_CLEARED`) go to `oxid2fa_audit.log` in the shop's log directory.
 They contain user ids and the origin of the request (`ip` = `REMOTE_ADDR`; `forwarded_for` = the first address of
 `X-Forwarded-For`, only if it is a valid IP and differs, because that header can be forged), never codes or secrets.
 IP addresses are personal data: keep the log under your retention rules.
@@ -62,6 +62,13 @@ entry point (`AdminController::authorize()`, `oxajax.php`) only checks `auth` th
 
 Pending logins expire after 15 minutes.
 
+**Other ways to sign in with a password.** The shop front end, the GraphQL API and other modules also end in
+`User::login()`, but have no place for a second code. The module extends `User::onLogin()` (it runs after the password
+was accepted and before the shop writes the login into the session): outside the admin area, an administrator who owes a
+second factor is refused with the shop's usual "invalid login" message, and `2FA_LOGIN_REFUSED` is logged. This
+covers anyone who is an administrator and has 2FA, is required to have it, or cannot get it because mandatory mode is on.
+Customers are not affected. The consequence: such an account cannot use the API or the front end with its password alone.
+
 ```
 Admin Login → password (core) → TwoFactorGate → TwoFactorPolicy
                                    ├─ not required ───────────────→ logged in
@@ -79,7 +86,7 @@ Admin Login → password (core) → TwoFactorGate → TwoFactorPolicy
 | `Integration/Oxid` | Session, user lookup, settings, `ViewConfig` and `User` extensions: the only code that knows OXID internals |
 | `Controller`, `Command` | Login hook, challenge page, security page, admin overview, user tab, CLI |
 
-The main use cases: `TwoFactorGate` (is a second factor due after the password check?), `TwoFactorLoginFlow` (the waiting
+The main use cases: `SecondFactorDecision` (does this administrator owe a second factor, and which step?), `TwoFactorGate` (the admin login), `PasswordOnlyLoginGuard` (every other password login), `TwoFactorLoginFlow` (the waiting
 login), `ChallengeService` (checks a code against the attempt budget), `SetupService`, `EnrollmentService`,
 `TotpVerifier`, `RecoveryCodeService`, `AdminOverview`, `AuditReport`, `KeyHealthChecker`.
 

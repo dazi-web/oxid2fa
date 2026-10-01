@@ -24,6 +24,12 @@ vendor/bin/oe-console oe:module:activate oxid2fa
 Back up `var/oxid2fa/encryption.key` together with the database and keep it out of version control. Without it the
 stored secrets cannot be read and the affected accounts have to be reset. Details: [docs/architecture.md](docs/architecture.md).
 
+## Other ways to sign in
+
+Administrators who owe a second factor (2FA active, required for the account, or mandatory mode) are refused when they
+sign in with a password alone anywhere but the admin area, for example through the shop front end or the GraphQL API
+(`2FA_LOGIN_REFUSED` is logged). Use a separate account for API access.
+
 ## Quality tools and tests
 
 ```bash

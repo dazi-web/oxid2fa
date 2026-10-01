@@ -15,7 +15,9 @@ use DaziWeb\Oxid2Fa\Application\AdminOverview;
 use DaziWeb\Oxid2Fa\Application\AuditLog;
 use DaziWeb\Oxid2Fa\Application\ChallengeService;
 use DaziWeb\Oxid2Fa\Application\EnrollmentService;
+use DaziWeb\Oxid2Fa\Application\PasswordOnlyLoginGuard;
 use DaziWeb\Oxid2Fa\Application\RecoveryCodeService;
+use DaziWeb\Oxid2Fa\Application\SecondFactorDecision;
 use DaziWeb\Oxid2Fa\Application\TotpVerifier;
 use DaziWeb\Oxid2Fa\Application\SetupService;
 use DaziWeb\Oxid2Fa\Application\TwoFactorGate;
@@ -41,6 +43,8 @@ final class TwoFactorFixture
     public RecoveryCodeService $recoveryCodes;
     public EnrollmentService $enrollmentService;
     public ChallengeService $challenge;
+    public SecondFactorDecision $decision;
+    public PasswordOnlyLoginGuard $passwordOnlyGuard;
     public TwoFactorGate $gate;
     public TwoFactorLoginFlow $flow;
     public SetupService $setup;
@@ -94,15 +98,14 @@ final class TwoFactorFixture
             $this->throttle,
             $audit
         );
-        $this->gate = new TwoFactorGate(
-            $this->session,
+        $this->decision = new SecondFactorDecision(
             new TwoFactorPolicy(),
             $settings,
             $this->enrollmentService,
-            $this->requirements,
-            $audit,
-            $this->clock
+            $this->requirements
         );
+        $this->gate = new TwoFactorGate($this->session, $settings, $this->decision, $audit, $this->clock);
+        $this->passwordOnlyGuard = new PasswordOnlyLoginGuard($this->decision, $audit);
         $this->flow = new TwoFactorLoginFlow(
             $this->session,
             $this->challenge,

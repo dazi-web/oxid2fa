@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Security
+- Administrators who owe a second factor can no longer sign in with their password alone outside the admin area
+  (shop front end, GraphQL API, other modules). They are refused and `2FA_LOGIN_REFUSED` is logged. Before, a GraphQL
+  token could be requested with the password only.
+
 ## [1.0.0] - 2026-10-01
 
 ### Added
