@@ -27,10 +27,10 @@
         "oxid-esales/oxideshop-ce": "dev-b-7.3.x",
         "phpunit/phpunit": "~10.5.17",
         "oxid-esales/developer-tools": "dev-b-7.3.x",
-        "oxid-esales/graphql-base": "^13.2"
+        "oxid-esales/graphql-base": "^12.0 || ^13.2"
     },
     "suggest": {
-        "oxid-esales/graphql-base": "Adds the twoFactorLogin query: sign in to the GraphQL API with a code"
+        "oxid-esales/graphql-base": "^12.0 || ^13.2: adds the twoFactorLogin query, to sign in to the GraphQL API with a code"
     },
     "conflict": {
         "oxid-esales/oxideshop-ce": "<7.3"

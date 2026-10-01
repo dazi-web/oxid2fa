@@ -30,7 +30,7 @@ Administrators who owe a second factor (2FA active, required for the account, or
 sign in with a password alone anywhere but the admin area, for example through the shop front end or the GraphQL API
 (`2FA_LOGIN_REFUSED` is logged).
 
-With the [GraphQL base module](https://github.com/OXID-eSales/graphql-base-module) installed, such an administrator
+With the [GraphQL base module](https://github.com/OXID-eSales/graphql-base-module) (version 12 or 13) installed, such an administrator
 signs in to the API with the query `twoFactorLogin(username, password, code)`. It returns the same access and refresh
 token as `login`, and `refresh` renews the access token without a new code. The code is checked like in the admin
 (attempt limit, no reuse). Without the GraphQL base module nothing changes.
