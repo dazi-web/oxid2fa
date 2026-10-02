@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace DaziWeb\Oxid2Fa\Tests\Unit;
 
-use DaziWeb\Oxid2Fa\Application\ChallengeRequired;
 use DaziWeb\Oxid2Fa\Application\PasswordOnlyLoginGuard;
 use DaziWeb\Oxid2Fa\Domain\Mode;
 use DaziWeb\Oxid2Fa\Tests\Unit\Support\TwoFactorFixture;
@@ -28,21 +27,18 @@ final class PasswordOnlyLoginGuardTest extends TestCase
         $f->enrollUser(self::ADMIN);
 
         // When the password has been accepted
+        $allowed = $f->passwordOnlyGuard->isAllowed(self::ADMIN);
+
         // Then the sign-in is refused and the operator can see it
-        $this->expectException(ChallengeRequired::class);
-        try {
-            $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
-        } finally {
-            $this->assertSame(['2FA_ENABLED', '2FA_LOGIN_REFUSED'], array_column($f->auditEntries, 'message'));
-        }
+        $this->assertFalse($allowed);
+        $this->assertSame(['2FA_ENABLED', '2FA_LOGIN_REFUSED'], array_column($f->auditEntries, 'message'));
     }
 
     public function testAnAdminWithoutTwoFactorMaySignInWhileItIsOptional(): void
     {
         $f = new TwoFactorFixture(Mode::Optional);
 
-        $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
-
+        $this->assertTrue($f->passwordOnlyGuard->isAllowed(self::ADMIN));
         $this->assertSame([], $f->auditEntries);
     }
 
@@ -51,8 +47,7 @@ final class PasswordOnlyLoginGuardTest extends TestCase
         // Given mandatory 2FA: the setup only exists in the admin login, so elsewhere there is no way in
         $f = new TwoFactorFixture(Mode::Mandatory);
 
-        $this->expectException(ChallengeRequired::class);
-        $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
+        $this->assertFalse($f->passwordOnlyGuard->isAllowed(self::ADMIN));
     }
 
     public function testAnAccountTheOperatorRequiresTwoFactorForIsRefused(): void
@@ -60,8 +55,7 @@ final class PasswordOnlyLoginGuardTest extends TestCase
         $f = new TwoFactorFixture(Mode::Optional);
         $f->requirements->setRequired(self::ADMIN, true);
 
-        $this->expectException(ChallengeRequired::class);
-        $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
+        $this->assertFalse($f->passwordOnlyGuard->isAllowed(self::ADMIN));
     }
 
     public function testNothingIsRefusedWhileTheFeatureIsSwitchedOff(): void
@@ -71,8 +65,7 @@ final class PasswordOnlyLoginGuardTest extends TestCase
         $f = new TwoFactorFixture(Mode::Disabled);
         $f->enrollments->copyFrom($enrolled->enrollments);
 
-        $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
-
+        $this->assertTrue($f->passwordOnlyGuard->isAllowed(self::ADMIN));
         $this->assertSame([], $f->auditEntries);
     }
 
@@ -86,9 +79,8 @@ final class PasswordOnlyLoginGuardTest extends TestCase
         $allowing = new TwoFactorFixture(Mode::Optional, operational: false, blockWithoutKey: false);
         $allowing->enrollments->copyFrom($enrolled->enrollments);
 
-        $allowing->passwordOnlyGuard->assertAllowed(self::ADMIN);
-        $this->expectException(ChallengeRequired::class);
-        $blocking->passwordOnlyGuard->assertAllowed(self::ADMIN);
+        $this->assertTrue($allowing->passwordOnlyGuard->isAllowed(self::ADMIN));
+        $this->assertFalse($blocking->passwordOnlyGuard->isAllowed(self::ADMIN));
     }
 
     public function testACorrectCodeSentWithThePasswordLetsAnAdminIn(): void
@@ -97,8 +89,8 @@ final class PasswordOnlyLoginGuardTest extends TestCase
         $enrolled = $f->enrollUser(self::ADMIN);
 
         $f->submission->provide($f->currentCode($enrolled['secret']));
-        $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
 
+        $this->assertTrue($f->passwordOnlyGuard->isAllowed(self::ADMIN));
         $this->assertNotContains('2FA_LOGIN_REFUSED', array_column($f->auditEntries, 'message'));
         $this->assertNull($f->submission->take(), 'the code is used up');
     }
@@ -109,16 +101,13 @@ final class PasswordOnlyLoginGuardTest extends TestCase
         $f->enrollUser(self::ADMIN);
 
         $f->submission->provide('000000');
-        try {
-            $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
-            $this->fail('Expected the sign-in to be refused');
-        } catch (ChallengeRequired) {
-            $this->assertSame(1, $f->throttle->attempts(self::ADMIN));
-            $this->assertSame(
-                ['2FA_ENABLED', '2FA_CHALLENGE_FAILED', '2FA_LOGIN_REFUSED'],
-                array_column($f->auditEntries, 'message')
-            );
-        }
+
+        $this->assertFalse($f->passwordOnlyGuard->isAllowed(self::ADMIN));
+        $this->assertSame(1, $f->throttle->attempts(self::ADMIN));
+        $this->assertSame(
+            ['2FA_ENABLED', '2FA_CHALLENGE_FAILED', '2FA_LOGIN_REFUSED'],
+            array_column($f->auditEntries, 'message')
+        );
     }
 
     public function testTheSameCodeCannotBeUsedTwice(): void
@@ -127,26 +116,23 @@ final class PasswordOnlyLoginGuardTest extends TestCase
         $enrolled = $f->enrollUser(self::ADMIN);
         $code = $f->currentCode($enrolled['secret']);
         $f->submission->provide($code);
-        $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
+        $this->assertTrue($f->passwordOnlyGuard->isAllowed(self::ADMIN));
 
         $f->submission->provide($code);
 
-        $this->expectException(ChallengeRequired::class);
-        $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
+        $this->assertFalse($f->passwordOnlyGuard->isAllowed(self::ADMIN));
     }
 
     public function testARecoveryCodeWorksOnceInsteadOfTheAuthenticatorCode(): void
     {
         $f = new TwoFactorFixture();
-        $enrolled = $f->enrollUser(self::ADMIN);
-        $recoveryCode = $enrolled['recoveryCodes'][0];
+        $recoveryCode = $f->enrollUser(self::ADMIN)['recoveryCodes'][0];
 
         $f->submission->provide($recoveryCode);
-        $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
+        $this->assertTrue($f->passwordOnlyGuard->isAllowed(self::ADMIN));
 
         $f->submission->provide($recoveryCode);
-        $this->expectException(ChallengeRequired::class);
-        $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
+        $this->assertFalse($f->passwordOnlyGuard->isAllowed(self::ADMIN));
     }
 
     public function testGuessingCodesLocksTheAccountEvenForTheCorrectCode(): void
@@ -155,17 +141,12 @@ final class PasswordOnlyLoginGuardTest extends TestCase
         $enrolled = $f->enrollUser(self::ADMIN);
         for ($i = 0; $i < 5; $i++) {
             $f->submission->provide('000000');
-            try {
-                $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
-            } catch (ChallengeRequired) {
-                // expected
-            }
+            $f->passwordOnlyGuard->isAllowed(self::ADMIN);
         }
 
         $f->submission->provide($f->currentCode($enrolled['secret']));
 
-        $this->expectException(ChallengeRequired::class);
-        $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
+        $this->assertFalse($f->passwordOnlyGuard->isAllowed(self::ADMIN));
     }
 
     public function testACodeDoesNotHelpWhereThereIsNothingToCheckItAgainst(): void
@@ -174,8 +155,7 @@ final class PasswordOnlyLoginGuardTest extends TestCase
         $f = new TwoFactorFixture(Mode::Mandatory);
         $f->submission->provide('123456');
 
-        $this->expectException(ChallengeRequired::class);
-        $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
+        $this->assertFalse($f->passwordOnlyGuard->isAllowed(self::ADMIN));
     }
 
     public function testACodeIsNotAcceptedWhileTheKeyIsMissing(): void
@@ -189,7 +169,6 @@ final class PasswordOnlyLoginGuardTest extends TestCase
         $f->clock->sleep(30); // a later time step than the one spent while enrolling, so the code itself is valid
         $f->submission->provide($f->currentCode($secret));
 
-        $this->expectException(ChallengeRequired::class);
-        $f->passwordOnlyGuard->assertAllowed(self::ADMIN);
+        $this->assertFalse($f->passwordOnlyGuard->isAllowed(self::ADMIN));
     }
 }

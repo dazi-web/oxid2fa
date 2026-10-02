@@ -11,7 +11,6 @@ namespace DaziWeb\Oxid2Fa\Application;
 
 use DaziWeb\Oxid2Fa\Domain\Mode;
 use DaziWeb\Oxid2Fa\Domain\PendingStep;
-use DaziWeb\Oxid2Fa\Domain\TwoFactorPolicy;
 
 /**
  * Whether an administrator whose password was just accepted still has to pass a second factor, and which step that
@@ -20,7 +19,6 @@ use DaziWeb\Oxid2Fa\Domain\TwoFactorPolicy;
 final readonly class SecondFactorDecision
 {
     public function __construct(
-        private TwoFactorPolicy $policy,
         private TwoFactorSettings $settings,
         private EnrollmentService $enrollments,
         private RequirementRepository $requirements,
@@ -46,6 +44,15 @@ final readonly class SecondFactorDecision
             return null;
         }
 
-        return $this->policy->stepFor($mode, $enrolled(), $this->requirements->isRequired($userId));
+        // An existing enrolment is always enforced, even if the shop owner later switches the mode back to "optional":
+        // otherwise a stolen password would be enough to bypass the second factor.
+        if ($enrolled()) {
+            return PendingStep::VerifyCode;
+        }
+
+        // An operator can require 2FA for single accounts even while it is optional for everybody else.
+        $required = $mode === Mode::Mandatory || $this->requirements->isRequired($userId);
+
+        return $required ? PendingStep::SetupRequired : null;
     }
 }

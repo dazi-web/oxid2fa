@@ -80,7 +80,7 @@ only if it exists) and the controller takes its login service as optional. The m
 `suggest`, not a requirement.
 
 ```
-Admin Login → password (core) → TwoFactorGate → TwoFactorPolicy
+Admin Login → password (core) → TwoFactorGate → SecondFactorDecision
                                    ├─ not required ───────────────→ logged in
                                    └─ required: auth withheld → challenge / setup
                                                   → code ok → session rotation → logged in
@@ -90,7 +90,7 @@ Admin Login → password (core) → TwoFactorGate → TwoFactorPolicy
 
 | Folder | Content |
 |---|---|
-| `Domain` | `TwoFactorPolicy`, enums, value objects. No OXID dependency |
+| `Domain` | Enums and value objects. No OXID dependency |
 | `Application` | The use cases and the ports they need (`LoginSession`, `UserDirectory`, repositories) |
 | `Infrastructure` | DBAL repositories, throttle, libsodium `SecretCipher`, key file, audit log reader |
 | `Integration/Oxid` | Session, user lookup, settings, `ViewConfig` and `User` extensions: the only code that knows OXID internals |

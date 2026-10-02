@@ -25,7 +25,6 @@ use DaziWeb\Oxid2Fa\Application\TwoFactorGate;
 use DaziWeb\Oxid2Fa\Application\TwoFactorLoginFlow;
 use DaziWeb\Oxid2Fa\Application\TwoFactorSettings;
 use DaziWeb\Oxid2Fa\Domain\Mode;
-use DaziWeb\Oxid2Fa\Domain\TwoFactorPolicy;
 use DaziWeb\Oxid2Fa\Infrastructure\EncryptionKey;
 use DaziWeb\Oxid2Fa\Infrastructure\SecretCipher;
 use Psr\Log\AbstractLogger;
@@ -105,7 +104,6 @@ final class TwoFactorFixture
             $audit
         );
         $this->decision = new SecondFactorDecision(
-            new TwoFactorPolicy(),
             $settings,
             $this->enrollmentService,
             $this->requirements

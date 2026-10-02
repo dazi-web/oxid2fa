@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace DaziWeb\Oxid2Fa\Integration\Oxid;
 
 use DaziWeb\Oxid2Fa\Application\AccountCleanup;
-use DaziWeb\Oxid2Fa\Application\ChallengeRequired;
 use DaziWeb\Oxid2Fa\Application\PasswordOnlyLoginGuard;
 use OxidEsales\Eshop\Core\Exception\UserException;
 
@@ -52,9 +51,7 @@ class User extends User_parent
             return;
         }
 
-        try {
-            $this->getService(PasswordOnlyLoginGuard::class)->assertAllowed((string)$this->getId());
-        } catch (ChallengeRequired) {
+        if (!$this->getService(PasswordOnlyLoginGuard::class)->isAllowed((string)$this->getId())) {
             throw oxNew(UserException::class, 'ERROR_MESSAGE_USER_NOVALIDLOGIN');
         }
     }

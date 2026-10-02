@@ -30,17 +30,16 @@ final readonly class PasswordOnlyLoginGuard
     ) {
     }
 
-    /** @throws ChallengeRequired */
-    public function assertAllowed(string $userId): void
+    public function isAllowed(string $userId): bool
     {
         $step = $this->decision->stepFor($userId);
         if ($step === null || ($step === PendingStep::VerifyCode && $this->codeIsCorrect($userId))) {
-            return;
+            return true;
         }
 
         $this->audit->record(AuditEvent::LoginRefused, $userId);
 
-        throw new ChallengeRequired('A second factor is required for this account.');
+        return false;
     }
 
     private function codeIsCorrect(string $userId): bool

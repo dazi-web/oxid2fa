@@ -6,9 +6,6 @@ services:
   Psr\Clock\ClockInterface:
     class: Symfony\Component\Clock\NativeClock
 
-  DaziWeb\Oxid2Fa\Domain\TwoFactorPolicy:
-    class: DaziWeb\Oxid2Fa\Domain\TwoFactorPolicy
-
   DaziWeb\Oxid2Fa\Infrastructure\EncryptionKeyFile:
     factory: [ 'DaziWeb\Oxid2Fa\Infrastructure\EncryptionKeyFile', 'forShop' ]
 
@@ -97,7 +94,7 @@ services:
     class: DaziWeb\Oxid2Fa\Application\SecondFactorDecision
 
   DaziWeb\Oxid2Fa\Application\ApiTokenRevocation:
-    factory: [ 'DaziWeb\Oxid2Fa\Integration\GraphQL\ApiTokenRevocationFactory', 'create' ]
+    class: DaziWeb\Oxid2Fa\Integration\GraphQL\GraphQLTokenRevocation
     autowire: false
     arguments:
       - '@?OxidEsales\GraphQL\Base\Infrastructure\RefreshTokenRepositoryInterface'
