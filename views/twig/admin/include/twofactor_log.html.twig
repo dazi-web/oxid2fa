@@ -2,11 +2,11 @@
 {% if auditRows %}
     <table cellspacing="0" cellpadding="0" border="0" width="98%">
         <tr>
-            <td class="listheader first" height="15">&nbsp;{{ translate({ ident: "OXID2FA_LOG_TIME" }) }}</td>
-            <td class="listheader" height="15">{{ translate({ ident: "OXID2FA_LOG_EVENT" }) }}</td>
-            {% if showAccount %}<td class="listheader" height="15">{{ translate({ ident: "OXID2FA_LOG_ACCOUNT" }) }}</td>{% endif %}
-            <td class="listheader" height="15">{{ translate({ ident: "OXID2FA_LOG_ACTOR" }) }}</td>
-            <td class="listheader" height="15">{{ translate({ ident: "OXID2FA_LOG_ORIGIN" }) }}</td>
+            <td class="listheader first" height="15" width="16%">&nbsp;{{ translate({ ident: "OXID2FA_LOG_TIME" }) }}</td>
+            <td class="listheader" height="15" width="{{ showAccount ? '26%' : '34%' }}">{{ translate({ ident: "OXID2FA_LOG_EVENT" }) }}</td>
+            {% if showAccount %}<td class="listheader" height="15" width="20%">{{ translate({ ident: "OXID2FA_LOG_ACCOUNT" }) }}</td>{% endif %}
+            <td class="listheader" height="15" width="{{ showAccount ? '20%' : '28%' }}">{{ translate({ ident: "OXID2FA_LOG_ACTOR" }) }}</td>
+            <td class="listheader" height="15" width="18%">{{ translate({ ident: "OXID2FA_LOG_ORIGIN" }) }}</td>
         </tr>
         {% for row in auditRows %}
             {% set cls = loop.index is odd ? 'listitem' : 'listitem2' %}

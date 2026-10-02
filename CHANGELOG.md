@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- The two admin pages "2FA – Mein Konto" and "2FA – Administratoren" are one page, *Service → 2FA*, with the sections
+  *Mein Konto*, *Administratoren* (main admins) and *Protokoll* (main admins), built from OXID's group and list tables
+
+### Fixed
+- The audit log showed a missing translation for refused sign-ins (`2FA_LOGIN_REFUSED`)
+
 ## [1.1.0] - 2026-10-01
 
 ### Added

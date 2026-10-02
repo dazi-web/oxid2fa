@@ -18,7 +18,7 @@ vendor/bin/oe-console oe:module:activate oxid2fa
 1. **Activate** the module. It creates its encryption key itself (`var/oxid2fa/encryption.key`, outside the document root).
 2. **Settings:** Admin → Extensions → Modules → oxid2fa → Settings: choose *2FA für Administratoren* = optional or mandatory.
    The top of that page shows whether the key is fine.
-3. **Done.** Admins set up their authenticator app at *Service → 2FA – Mein Konto*; with mandatory mode they are led through
+3. **Done.** Admins set up their authenticator app at *Service → 2FA*; with mandatory mode they are led through
    the setup at their next login.
 
 Back up `var/oxid2fa/encryption.key` together with the database and keep it out of version control. Without it the

@@ -12,7 +12,6 @@
 use DaziWeb\Oxid2Fa\Controller\Admin\LoginController;
 use DaziWeb\Oxid2Fa\Controller\Admin\TwoFactorAdminController;
 use DaziWeb\Oxid2Fa\Controller\Admin\TwoFactorChallengeController;
-use DaziWeb\Oxid2Fa\Controller\Admin\TwoFactorOverviewController;
 use DaziWeb\Oxid2Fa\Controller\Admin\TwoFactorUserAdminController;
 use DaziWeb\Oxid2Fa\Integration\Oxid\User;
 use DaziWeb\Oxid2Fa\Integration\Oxid\ViewConfig;
@@ -39,7 +38,6 @@ $aModule = [
         'oxid2fa_twofactor_challenge' => TwoFactorChallengeController::class,
         'oxid2fa_admin_twofactor' => TwoFactorAdminController::class,
         'oxid2fa_admin_user_twofactor' => TwoFactorUserAdminController::class,
-        'oxid2fa_admin_overview' => TwoFactorOverviewController::class,
     ],
     'events'      => [
         'onActivate' => '\\DaziWeb\\Oxid2Fa\\Core\\ModuleEvents::onActivate',

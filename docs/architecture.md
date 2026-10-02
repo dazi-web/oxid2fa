@@ -24,8 +24,8 @@ sessions; this feature only decides whether a verified password is enough and, i
    **Losing or changing the key makes all stored TOTP secrets unreadable**: restore it from the backup, or reset the
    affected accounts.
 2. Module settings → *Zwei-Faktor-Authentifizierung*: *2FA für Administratoren* = off / optional (default) / mandatory.
-3. Admins set up their own 2FA under *Service → 2FA – Mein Konto*. A second factor can only be set up by its owner (the secret
-   must end up on their device), but main administrators can **require** it per account: the page *Service → 2FA – Administratoren*
+3. Admins set up their own 2FA under *Service → 2FA* (section *Mein Konto*). A second factor can only be set up by its owner (the secret
+   must end up on their device), but main administrators can **require** it per account: the section *Administratoren* of the same page
    (and the user tab *2FA*) lists everyone with status and a "Verpflichtend machen" button. A required account
    is led into the setup at its next login even while the shop mode is *optional*. The same table offers the reset;
    nobody can reset their own account there (use *2FA deaktivieren*, which asks for a code). With *mandatory*, admins without 2FA are led into
@@ -43,8 +43,8 @@ They contain user ids and the origin of the request (`ip` = `REMOTE_ADDR`; `forw
 `X-Forwarded-For`, only if it is a valid IP and differs, because that header can be forged), never codes or secrets.
 IP addresses are personal data: keep the log under your retention rules.
 
-The latest events are shown in the admin: *Service → 2FA – Administratoren* (all accounts, with the failed attempts per
-account and a button to release a lock) and in the user tab *2FA* (that account only). Only the last 512 KB of the file
+The latest events are shown in the admin: *Service → 2FA*, section *Protokoll* (main admins only; the list above it shows
+all accounts, with the failed attempts per account and a button to release a lock) and in the user tab *2FA* (that account only). Only the last 512 KB of the file
 are read, and old files are not rotated by the module: rotate `oxid2fa_audit.log` with your usual log rotation.
 
 ## How it hooks in
