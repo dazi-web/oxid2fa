@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Security
+- GraphQL tokens of an account are ended when the account gets a second factor, when 2FA is made mandatory for it
+  and when it is reset. Before, a refresh token from the time without 2FA could still renew access without a code.
+
 ### Changed
 - The two admin pages "2FA – Mein Konto" and "2FA – Administratoren" are one page, *Service → 2FA*, with the sections
   *Mein Konto*, *Administratoren* (main admins) and *Protokoll* (main admins), built from OXID's group and list tables

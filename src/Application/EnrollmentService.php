@@ -23,6 +23,7 @@ final readonly class EnrollmentService
         private RecoveryCodeService $recoveryCodes,
         private ChallengeService $challenge,
         private ChallengeThrottle $throttle,
+        private ApiTokenRevocation $apiTokens,
         private AuditLog $audit,
     ) {
     }
@@ -102,6 +103,7 @@ final readonly class EnrollmentService
 
         $this->enrollments->delete($userId);
         $this->throttle->reset($userId);
+        $this->apiTokens->revokeAllFor($userId);
         $this->audit->record(AuditEvent::Reset, $userId, $actorId);
     }
 

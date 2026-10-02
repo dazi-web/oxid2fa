@@ -25,6 +25,7 @@ final readonly class SetupService
         private RecoveryCodeService $recoveryCodes,
         private TwoFactorSettings $settings,
         private UserDirectory $users,
+        private ApiTokenRevocation $apiTokens,
         private AuditLog $audit,
         private ClockInterface $clock,
     ) {
@@ -64,6 +65,7 @@ final readonly class SetupService
             return null;
         }
 
+        $this->apiTokens->revokeAllFor($userId);
         $this->audit->record(AuditEvent::Enabled, $userId);
 
         return $this->recoveryCodes->issue($enrollment->identifier);

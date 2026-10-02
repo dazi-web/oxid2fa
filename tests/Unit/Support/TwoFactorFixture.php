@@ -46,6 +46,7 @@ final class TwoFactorFixture
     public ChallengeService $challenge;
     public SecondFactorDecision $decision;
     public SecondFactorSubmission $submission;
+    public RecordingApiTokenRevocation $apiTokens;
     public PasswordOnlyLoginGuard $passwordOnlyGuard;
     public TwoFactorGate $gate;
     public TwoFactorLoginFlow $flow;
@@ -82,6 +83,7 @@ final class TwoFactorFixture
         $audit = new AuditLog($this->collectingLogger(), new FakeRequestContext());
         $this->totp = new TotpVerifier($this->clock, $this->cipher, $this->enrollments);
 
+        $this->apiTokens = new RecordingApiTokenRevocation();
         $this->challenge = new ChallengeService($this->totp, $this->recoveryCodes, $this->throttle, $audit);
         $this->setup = new SetupService(
             $this->enrollments,
@@ -90,6 +92,7 @@ final class TwoFactorFixture
             $this->recoveryCodes,
             $settings,
             $this->users,
+            $this->apiTokens,
             $audit,
             $this->clock
         );
@@ -98,6 +101,7 @@ final class TwoFactorFixture
             $this->recoveryCodes,
             $this->challenge,
             $this->throttle,
+            $this->apiTokens,
             $audit
         );
         $this->decision = new SecondFactorDecision(
@@ -128,6 +132,7 @@ final class TwoFactorFixture
             $this->enrollments,
             $this->requirements,
             $this->throttle,
+            $this->apiTokens,
             $audit
         );
         $this->accountCleanup = new AccountCleanup($this->enrollments, $this->requirements, $this->throttle);

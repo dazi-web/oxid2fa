@@ -126,6 +126,9 @@ login), `ChallengeService` (checks a code against the attempt budget), `SetupSer
 
 ## Known limits
 
+* Switching the shop setting to *mandatory* cannot end API tokens that were issued before; they run out on their own
+  (by default the access token after 8 hours and the refresh token after 24 hours). Enabling 2FA, making it mandatory for
+  an account and resetting an account do end them.
 * **Mandatory mode**: until an admin has set up 2FA, whoever knows the password can set up their own authenticator
   first. After switching it on, have every admin set up 2FA right away (reset: CLI or admin overview).
 * **Locking**: someone who only knows the password can lock an account for 15 minutes by guessing. A main admin can

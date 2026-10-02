@@ -96,6 +96,13 @@ services:
   DaziWeb\Oxid2Fa\Application\SecondFactorDecision:
     class: DaziWeb\Oxid2Fa\Application\SecondFactorDecision
 
+  DaziWeb\Oxid2Fa\Application\ApiTokenRevocation:
+    factory: [ 'DaziWeb\Oxid2Fa\Integration\GraphQL\ApiTokenRevocationFactory', 'create' ]
+    autowire: false
+    arguments:
+      - '@?OxidEsales\GraphQL\Base\Infrastructure\RefreshTokenRepositoryInterface'
+      - '@?OxidEsales\GraphQL\Base\Infrastructure\Token'
+
   DaziWeb\Oxid2Fa\Application\SecondFactorSubmission:
     class: DaziWeb\Oxid2Fa\Application\SecondFactorSubmission
     public: true

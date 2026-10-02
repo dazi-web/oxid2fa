@@ -21,6 +21,7 @@ final readonly class AdminOverview
         private EnrollmentRepository $enrollments,
         private RequirementRepository $requirements,
         private ChallengeThrottle $throttle,
+        private ApiTokenRevocation $apiTokens,
         private AuditLog $audit,
     ) {
     }
@@ -57,6 +58,9 @@ final readonly class AdminOverview
         }
 
         $this->requirements->setRequired($userId, $required);
+        if ($required) {
+            $this->apiTokens->revokeAllFor($userId);
+        }
         $this->audit->record(
             $required ? AuditEvent::RequiredSet : AuditEvent::RequiredCleared,
             $userId,
