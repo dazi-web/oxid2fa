@@ -10,12 +10,14 @@
         </tr>
         {% for row in auditRows %}
             {% set cls = loop.index is odd ? 'listitem' : 'listitem2' %}
+            {# turned down sign-in attempts are red, like the admin's own error messages #}
+            {% set red = row.isRefusal ? 'color: #F00000;' : '' %}
             <tr>
-                <td class="{{ cls }}" height="20" nowrap>&nbsp;{{ row.time }}</td>
-                <td class="{{ cls }}">{{ translate({ ident: "OXID2FA_EVENT_" ~ row.event }) }}</td>
-                {% if showAccount %}<td class="{{ cls }}">{{ row.account }}</td>{% endif %}
-                <td class="{{ cls }}">{{ row.actor }}</td>
-                <td class="{{ cls }}" translate="no">{{ row.origin }}</td>
+                <td class="{{ cls }}" height="20" nowrap style="{{ red }}">&nbsp;{{ row.time }}</td>
+                <td class="{{ cls }}" style="{{ red }}">{% if row.isRefusal %}<b>{{ translate({ ident: "OXID2FA_EVENT_" ~ row.event }) }}</b>{% else %}{{ translate({ ident: "OXID2FA_EVENT_" ~ row.event }) }}{% endif %}</td>
+                {% if showAccount %}<td class="{{ cls }}" style="{{ red }}">{{ row.account }}</td>{% endif %}
+                <td class="{{ cls }}" style="{{ red }}">{{ row.actor }}</td>
+                <td class="{{ cls }}" style="{{ red }}" translate="no">{{ row.origin }}</td>
             </tr>
         {% endfor %}
     </table>

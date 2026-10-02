@@ -23,4 +23,10 @@ enum AuditEvent: string
     case LoginRefused = '2FA_LOGIN_REFUSED';
     case RequiredSet = '2FA_REQUIRED_SET';
     case RequiredCleared = '2FA_REQUIRED_CLEARED';
+
+    /** A sign-in attempt that was turned down: the admin shows these in red. */
+    public function isRefusal(): bool
+    {
+        return in_array($this, [self::LoginRefused, self::ChallengeFailed, self::ChallengeLocked], true);
+    }
 }

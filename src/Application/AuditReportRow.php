@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace DaziWeb\Oxid2Fa\Application;
 
+use DaziWeb\Oxid2Fa\Domain\AuditEvent;
+
 final readonly class AuditReportRow
 {
     public function __construct(
@@ -18,5 +20,11 @@ final readonly class AuditReportRow
         public string $actor,
         public string $origin,
     ) {
+    }
+
+    /** A turned down sign-in attempt, shown in red. */
+    public function isRefusal(): bool
+    {
+        return AuditEvent::tryFrom($this->event)?->isRefusal() === true;
     }
 }

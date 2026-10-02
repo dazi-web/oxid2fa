@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- Turned down sign-in attempts (wrong code, locked account, refused password-only sign-in) are shown in red in the log
+
 ## [1.1.1] - 2026-10-02
 
 ### Security

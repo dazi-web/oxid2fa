@@ -38,4 +38,32 @@ final class AuditReportTest extends TestCase
         $this->assertSame('cli', $rows[1]->actor);
         $this->assertSame('203.0.113.7', $rows[0]->origin);
     }
+
+    public function testTurnedDownSignInAttemptsAreMarkedAndNothingElse(): void
+    {
+        $trail = new class implements AuditTrail {
+            public function recent(int $limit, ?string $userId = null): array
+            {
+                return array_map(
+                    static fn (string $event): AuditEntry => new AuditEntry('2026-10-01 10:00', $event, 'u1', 'u1', ''),
+                    [
+                        '2FA_LOGIN_REFUSED',
+                        '2FA_CHALLENGE_FAILED',
+                        '2FA_CHALLENGE_LOCKED',
+                        '2FA_ENABLED',
+                        'RECOVERY_CODE_USED',
+                        '2FA_NOT_OPERATIONAL',
+                        'SOMETHING_FROM_A_NEWER_VERSION',
+                    ]
+                );
+            }
+        };
+
+        $rows = (new AuditReport($trail, new FakeUserDirectory()))->recent(10);
+
+        $this->assertSame(
+            [true, true, true, false, false, false, false],
+            array_map(static fn ($row): bool => $row->isRefusal(), $rows)
+        );
+    }
 }
