@@ -4,10 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [1.1.2] - 2026-10-03
 
 ### Changed
 - Turned down sign-in attempts (wrong code, locked account, refused password-only sign-in) are shown in red in the log
+- Internal: fewer classes (the policy is part of `SecondFactorDecision`, one class revokes API tokens); no change in behaviour
 
 ## [1.1.1] - 2026-10-02
 
